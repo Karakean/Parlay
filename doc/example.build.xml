@@ -1,0 +1,87 @@
+<project name="Ericsson Network Resource Gateway SDK" default="showInfo" basedir=".">
+
+	<target name="showInfo" description="Default information about the SDK">
+		<echo message="Due to environment dependancies, please use appropriate batch file to run an application."/>
+		<echo message="For non-Windows users, please refer to the documentation on how to set up the SDK on other systems."/>
+		<echo message=""/>
+	</target>
+	
+	<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+
+	<target name="warning" if="warn">
+		<echo message="WARNING! Environment might not be configured. See documentation for further information."/>
+	</target>
+	
+	<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+
+	<target name="init">
+		<property environment="env"/>
+		<condition property= "warn" value= "true" > 
+			<not>
+				<and>
+					<isset property= "env.ENVIRONMENT_SET"/> 
+					<isset property= "env.APPLICATION"/> 
+				</and>
+			</not>
+		</condition > 
+		<antcall target="warning"/>
+	</target>
+
+	<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+
+	<target name="compile-groupcommunicator" depends="init">
+		<echo message="Compiling the groupcommunicator module..." />
+		<javac srcdir="./examples/groupcommunicator/src" destdir="./examples/groupcommunicator/cls" includeantruntime="false">
+			<classpath>
+				<pathelement path="./lib/3PP/activation.jar" />
+				<pathelement path="./lib/3PP/mail.jar" />
+				<pathelement path="./lib/corba/sun/lib/corba_sun.jar" />
+				<pathelement path="./lib/coreapi/lib/coreapi.jar" />
+				<pathelement path="./lib/utilityapi/lib/utilityapi.jar" />
+				<pathelement path="./examples/tools/cls" />
+			</classpath>
+		</javac>
+	</target>
+	
+	<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+
+	<target name="simulator" depends="init">
+		<java jar="./simulator/lib/simulator.jar" fork="true" output="./simulator/lib/runtime.log" failonerror="true" dir="./simulator"/>
+	</target>
+
+	<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+
+	<target name="att" depends="init">
+		<parallel>
+			<exec executable="tnameserv">
+			</exec>
+			<java classname="com.ericsson.nrgsdk.examples.att.Main" fork="true" failonerror="true" dir="./examples/att">
+				<classpath>
+					<pathelement path="./examples/att/cls" />
+					<pathelement path="./examples/tools/cls" />
+					<pathelement path="./lib/3PP/activation.jar" />
+					<pathelement path="./lib/3PP/mail.jar" />
+					<pathelement path="./lib/corba/sun/lib/corba_sun.jar" />
+					<pathelement path="./lib/testapi/lib/testapi.jar" />
+					<pathelement path="./lib/utilityapi/lib/utilityapi.jar" />
+				</classpath>
+			</java>
+		</parallel>
+	</target>
+
+	<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+
+	<target name="example" depends="init">
+		<java classname="com.ericsson.nrgsdk.examples.applications.${env.APPLICATION}.Main" fork="true" failonerror="true" dir="./examples/${env.APPLICATION}">
+			<classpath>
+				<pathelement path="./examples/${env.APPLICATION}/cls" />
+				<pathelement path="./examples/tools/cls" />
+				<pathelement path="./lib/3PP/activation.jar" />
+				<pathelement path="./lib/3PP/mail.jar" />
+				<pathelement path="./lib/corba/sun/lib/corba_sun.jar" />
+				<pathelement path="./lib/coreapi/lib/coreapi.jar" />
+				<pathelement path="./lib/utilityapi/lib/utilityapi.jar" />
+			</classpath>
+		</java>
+	</target>
+</project>
