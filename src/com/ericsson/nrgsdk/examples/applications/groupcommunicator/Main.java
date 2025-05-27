@@ -17,14 +17,12 @@ public class Main {
         Configuration.INSTANCE.load(this);
         GUI gui = new GUI();
         gui.addButton(new AbstractAction("Start") {
-            @Override
             public void actionPerformed(ActionEvent e) {
                 start();
             }
         });
         itsFeature = new Feature(gui);
         gui.addButton(new AbstractAction("Join Group") {
-            @Override
             public void actionPerformed(ActionEvent e) {
                 String groupId = JOptionPane.showInputDialog("Enter Group ID:");
                 String memberId = JOptionPane.showInputDialog("Enter Member ID:");
@@ -32,7 +30,6 @@ public class Main {
             }
         });
         gui.addButton(new AbstractAction("Leave Group") {
-            @Override
             public void actionPerformed(ActionEvent e) {
                 String groupId = JOptionPane.showInputDialog("Enter Group ID:");
                 String memberId = JOptionPane.showInputDialog("Enter Member ID:");
@@ -40,7 +37,6 @@ public class Main {
             }
         });
         gui.addButton(new AbstractAction("Send Message") {
-            @Override
             public void actionPerformed(ActionEvent e) {
                 String groupId = JOptionPane.showInputDialog("Enter Group ID:");
                 String senderId = JOptionPane.showInputDialog("Enter Sender ID:");
@@ -49,13 +45,11 @@ public class Main {
             }
         });
         gui.addButton(new AbstractAction("Stop") {
-            @Override
             public void actionPerformed(ActionEvent e) {
                 stop();
             }
         });
         gui.addWindowListener(new WindowAdapter() {
-            @Override
             public void windowClosing(WindowEvent e) {
                 terminate();
             }
