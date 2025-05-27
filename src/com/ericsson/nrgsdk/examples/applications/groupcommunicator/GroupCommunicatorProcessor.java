@@ -15,25 +15,31 @@ import com.ericsson.nrgsdk.examples.tools.SDKToolkit;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
 public class GroupCommunicatorProcessor extends IpAppHosaUIManagerAdapter {
 
     private IpHosaUIManager hosaUIManager;
-    private Map<String, Set<String>> groupMembers = new HashMap<>();
+    private Map groupMembers = new HashMap();
 
     public GroupCommunicatorProcessor(IpHosaUIManager hosaUIManager) {
         this.hosaUIManager = hosaUIManager;
     }
 
     public void joinGroup(String groupId, String memberId) {
-        groupMembers.computeIfAbsent(groupId, k -> new HashSet<>()).add(memberId);
+        Set members = (Set) groupMembers.get(groupId);
+        if (members == null) {
+            members = new HashSet();
+            groupMembers.put(groupId, members);
+        }
+        members.add(memberId);
         System.out.println(memberId + " joined group " + groupId);
     }
 
     public void leaveGroup(String groupId, String memberId) {
-        Set<String> members = groupMembers.get(groupId);
+        Set members = (Set) groupMembers.get(groupId);
         if (members != null && members.remove(memberId)) {
             System.out.println(memberId + " left group " + groupId);
             if (members.isEmpty()) {
@@ -45,9 +51,10 @@ public class GroupCommunicatorProcessor extends IpAppHosaUIManagerAdapter {
     }
 
     public void sendMessageToGroup(String groupId, String senderId, String message) {
-        Set<String> members = groupMembers.get(groupId);
+        Set members = (Set) groupMembers.get(groupId);
         if (members != null) {
-            for (String member : members) {
+            for (Iterator it = members.iterator(); it.hasNext();) {
+                String member = (String) it.next();
                 if (!member.equals(senderId)) {
                     sendSMS(senderId, member, message);
                 }
@@ -65,7 +72,9 @@ public class GroupCommunicatorProcessor extends IpAppHosaUIManagerAdapter {
         TpAddress originatingAddress = SDKToolkit.createTpAddress(sender);
         TpAddress destinationAddress = SDKToolkit.createTpAddress(receiver);
         TpHosaTerminatingAddressList recipients = new TpHosaTerminatingAddressList();
-        recipients.ToAddressList = new TpAddress[]{destinationAddress};
+        TpAddress[] addressArray = new TpAddress[1];
+        addressArray[0] = destinationAddress;
+        recipients.ToAddressList = addressArray;
 
         TpHosaMessage message = new TpHosaMessage();
         message.Text(messageContent);
@@ -85,13 +94,11 @@ public class GroupCommunicatorProcessor extends IpAppHosaUIManagerAdapter {
         );
     }
 
-    @Override
     public void hosaSendMessageErr(int assignmentID, TpHosaSendMessageError[] errorList) {
         System.err.println("Error sending SMS to " + errorList[0].UserAddress.AddrString +
                 " (ErrorCode: " + errorList[0].Error.value() + ")");
     }
 
-    @Override
     public void hosaSendMessageRes(int assignmentID, TpHosaSendMessageReport[] responseList) {
         System.out.println("SMS successfully sent to " + responseList[0].UserAddress.AddrString);
     }

@@ -3,7 +3,6 @@ package com.ericsson.nrgsdk.examples.applications.groupcommunicator;
 import com.ericsson.nrgsdk.examples.tools.configuration.NestedProperties;
 import com.ericsson.nrgsdk.examples.tools.configuration.NotFoundException;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
