@@ -1,23 +1,30 @@
 package com.ericsson.nrgsdk.examples.applications.groupcommunicator;
 
+import com.ericsson.hosasdk.api.TpAddress;
+import com.ericsson.hosasdk.api.TpHosaDeliveryTime;
+import com.ericsson.hosasdk.api.TpHosaMessage;
+import com.ericsson.hosasdk.api.TpHosaSendMessageError;
+import com.ericsson.hosasdk.api.TpHosaSendMessageReport;
+import com.ericsson.hosasdk.api.TpHosaTerminatingAddressList;
+import com.ericsson.hosasdk.api.TpHosaUIMessageDeliveryType;
+import com.ericsson.hosasdk.api.hui.IpAppHosaUIManager;
+import com.ericsson.hosasdk.api.hui.IpAppHosaUIManagerAdapter;
 import com.ericsson.hosasdk.api.hui.IpHosaUIManager;
-import com.ericsson.hosasdk.api.hmm.hus.IpHosaUserStatus;
+import com.ericsson.hosasdk.api.ui.P_UI_RESPONSE_REQUIRED;
+import com.ericsson.nrgsdk.examples.tools.SDKToolkit;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class GroupCommunicatorProcessor {
+public class GroupCommunicatorProcessor extends IpAppHosaUIManagerAdapter {
+
     private IpHosaUIManager hosaUIManager;
-    private IpHosaUserStatus hosaUSManager;
-    private Feature feature;
     private Map<String, Set<String>> groupMembers = new HashMap<>();
 
-    public GroupCommunicatorProcessor(IpHosaUIManager hosaUIManager, IpHosaUserStatus hosaUSManager, Feature feature) {
+    public GroupCommunicatorProcessor(IpHosaUIManager hosaUIManager) {
         this.hosaUIManager = hosaUIManager;
-        this.hosaUSManager = hosaUSManager;
-        this.feature = feature;
     }
 
     public void joinGroup(String groupId, String memberId) {
@@ -42,11 +49,50 @@ public class GroupCommunicatorProcessor {
         if (members != null) {
             for (String member : members) {
                 if (!member.equals(senderId)) {
-                    feature.messageReceived(senderId, groupId, message);
+                    sendSMS(senderId, member, message);
                 }
             }
         } else {
             System.err.println("Group " + groupId + " not found.");
         }
+    }
+
+    private void sendSMS(String sender, String receiver, String messageContent) {
+        TpHosaUIMessageDeliveryType deliveryType = TpHosaUIMessageDeliveryType.P_HUI_SMS;
+        TpHosaDeliveryTime deliveryTime = new TpHosaDeliveryTime();
+        deliveryTime.Dummy((short) 0);
+
+        TpAddress originatingAddress = SDKToolkit.createTpAddress(sender);
+        TpAddress destinationAddress = SDKToolkit.createTpAddress(receiver);
+        TpHosaTerminatingAddressList recipients = new TpHosaTerminatingAddressList();
+        recipients.ToAddressList = new TpAddress[]{destinationAddress};
+
+        TpHosaMessage message = new TpHosaMessage();
+        message.Text(messageContent);
+
+        hosaUIManager.hosaSendMessageReq(
+                this,
+                originatingAddress,
+                recipients,
+                null,
+                message,
+                deliveryType,
+                Configuration.INSTANCE.getBillingInformation(),
+                P_UI_RESPONSE_REQUIRED.value,
+                false,
+                deliveryTime,
+                ""
+        );
+    }
+
+    @Override
+    public void hosaSendMessageErr(int assignmentID, TpHosaSendMessageError[] errorList) {
+        System.err.println("Error sending SMS to " + errorList[0].UserAddress.AddrString +
+                " (ErrorCode: " + errorList[0].Error.value() + ")");
+    }
+
+    @Override
+    public void hosaSendMessageRes(int assignmentID, TpHosaSendMessageReport[] responseList) {
+        System.out.println("SMS successfully sent to " + responseList[0].UserAddress.AddrString);
     }
 }

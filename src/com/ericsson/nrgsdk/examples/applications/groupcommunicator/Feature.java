@@ -2,7 +2,6 @@ package com.ericsson.nrgsdk.examples.applications.groupcommunicator;
 
 import com.ericsson.hosasdk.api.HOSAMonitor;
 import com.ericsson.hosasdk.api.fw.P_UNKNOWN_SERVICE_TYPE;
-import com.ericsson.hosasdk.api.hmm.hus.IpHosaUserStatus;
 import com.ericsson.hosasdk.api.hui.IpHosaUIManager;
 import com.ericsson.hosasdk.utility.framework.FWproxy;
 import com.ericsson.nrgsdk.examples.tools.SDKToolkit;
@@ -10,7 +9,6 @@ import com.ericsson.nrgsdk.examples.tools.SDKToolkit;
 public class Feature {
     private FWproxy itsFramework;
     private IpHosaUIManager itsHosaUIManager;
-    private IpHosaUserStatus itsHosaUSManager;
     private GroupCommunicatorProcessor itsGroupCommunicatorProcessor;
 
     public Feature(GUI aGUI) {
@@ -25,12 +23,11 @@ public class Feature {
         System.out.println("Getting service managers");
         try {
             itsHosaUIManager = (IpHosaUIManager) itsFramework.obtainSCF("SP_HOSA_USER_INTERACTION");
-            itsHosaUSManager = (IpHosaUserStatus) itsFramework.obtainSCF("SP_HOSA_USER_STATUS");
         } catch (P_UNKNOWN_SERVICE_TYPE anException) {
             System.err.println("Service not found: " + anException);
         }
         System.out.println("Creating group communicator processor");
-        itsGroupCommunicatorProcessor = new GroupCommunicatorProcessor(itsHosaUIManager, itsHosaUSManager, this);
+        itsGroupCommunicatorProcessor = new GroupCommunicatorProcessor(itsHosaUIManager);
     }
 
     public void stop() {
@@ -58,6 +55,10 @@ public class Feature {
     }
 
     private String getDescription() {
-        return "This application allows users to join groups, leave groups, send messages, and receive messages.";
+        return "This application allows users to join groups, leave groups, send messages, and receive messages via SMS.";
+    }
+
+    public void terminate() {
+        System.exit(0);
     }
 }
