@@ -16,9 +16,7 @@ public class Configuration extends NestedProperties {
 
     private Group[] itsGroups;
 
-    private Configuration() {
-
-    }
+    private Configuration() {}
 
     public void load(Object aSource) throws IOException {
         super.load(aSource);
@@ -47,14 +45,12 @@ public class Configuration extends NestedProperties {
 
     private Group loadGroup(String aParm) {
         String groupId = loadString(aParm + ".groupId");
-        Set<User> initialMembers = loadMembers(aParm + ".members");
-        Group group = new Group(groupId, initialMembers);
-
-        return group;
+        Set initialMembers = loadMembers(aParm + ".members");
+        return new Group(groupId, initialMembers);
     }
 
-    private Set<User> loadMembers(String aParm) {
-        Set<User> users = new HashSet<>();
+    private Set loadMembers(String aParm) {
+        Set users = new HashSet();
         for (int i = 0;; i++) {
             try {
                 users.add(new User(loadString(aParm + "." + i)));

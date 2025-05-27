@@ -7,7 +7,7 @@ public class Group {
     private String groupId;
     private Set members;
 
-    public Group(String groupId, Set<User> members) {
+    public Group(String groupId, Set members) {
         this.groupId = groupId;
         this.members = members;
     }
