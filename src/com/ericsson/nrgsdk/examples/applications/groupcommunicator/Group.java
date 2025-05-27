@@ -7,9 +7,9 @@ public class Group {
     private String groupId;
     private Set members;
 
-    public Group(String groupId) {
+    public Group(String groupId, Set<User> members) {
         this.groupId = groupId;
-        this.members = new HashSet();
+        this.members = members;
     }
 
     public String getGroupId() {

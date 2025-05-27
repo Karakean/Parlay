@@ -1,80 +1,77 @@
 package com.ericsson.nrgsdk.examples.applications.groupcommunicator;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.StringTokenizer;
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.IOException;
 
 public class Main {
-    private static final Map groups = new HashMap();
-    private static final Map users = new HashMap();
-    private static Feature feature;
+    private Feature itsFeature;
 
-    public static void main(String[] args) {
-        feature = new Feature();
-        feature.start();
-        java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(System.in));
-        System.out.println("Group Communicator Example (Parlay/OSA API based)");
-        while (true) {
-            System.out.println("\nCommands: join <user> <group>, send <user> <group> <message>, leave <user> <group>, exit");
-            String line = null;
-            try {
-                line = reader.readLine();
-            } catch (java.io.IOException e) {
-                break;
+    public static void main(String[] args) throws Exception {
+        new Main();
+    }
+
+    public Main() throws IOException {
+        Configuration.INSTANCE.load(this);
+        GUI gui = new GUI();
+        gui.addButton(new AbstractAction("Start") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                start();
             }
-            if (line == null) break;
-            StringTokenizer st = new StringTokenizer(line, " ");
-            if (!st.hasMoreTokens()) continue;
-            String command = st.nextToken();
-            if (command.equalsIgnoreCase("join") && st.countTokens() >= 2) {
-                String userId = st.nextToken();
-                String groupId = st.nextToken();
-                User user = (User) users.get(userId);
-                if (user == null) {
-                    user = new User(userId);
-                    users.put(userId, user);
-                }
-                Group group = (Group) groups.get(groupId);
-                if (group == null) {
-                    group = new Group(groupId);
-                    groups.put(groupId, group);
-                }
-                group.join(user);
-                System.out.println(userId + " joined group " + groupId);
-            } else if (command.equalsIgnoreCase("send") && st.countTokens() >= 2) {
-                String userId = st.nextToken();
-                String groupId = st.nextToken();
-                String messageContent = "";
-                if (st.hasMoreTokens()) {
-                    messageContent = line.substring(line.indexOf(groupId) + groupId.length()).trim();
-                }
-                User user = (User) users.get(userId);
-                Group group = (Group) groups.get(groupId);
-                if (user != null && group != null) {
-                    Message message = new Message(userId, messageContent);
-                    group.broadcast(message);
-                    feature.messageReceived(userId, groupId, messageContent);
-                } else {
-                    System.out.println("User or group not found.");
-                }
-            } else if (command.equalsIgnoreCase("leave") && st.countTokens() >= 2) {
-                String userId = st.nextToken();
-                String groupId = st.nextToken();
-                User user = (User) users.get(userId);
-                Group group = (Group) groups.get(groupId);
-                if (user != null && group != null) {
-                    group.leave(user);
-                    System.out.println(userId + " left group " + groupId);
-                } else {
-                    System.out.println("User or group not found.");
-                }
-            } else if (command.equalsIgnoreCase("exit")) {
-                feature.stop();
-                break;
-            } else {
-                System.out.println("Unknown command.");
+        });
+        itsFeature = new Feature(gui);
+        gui.addButton(new AbstractAction("Join Group") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String groupId = JOptionPane.showInputDialog("Enter Group ID:");
+                String memberId = JOptionPane.showInputDialog("Enter Member ID:");
+                itsFeature.joinGroup(groupId, memberId);
             }
-        }
-        try { reader.close(); } catch (Exception e) {}
+        });
+        gui.addButton(new AbstractAction("Leave Group") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String groupId = JOptionPane.showInputDialog("Enter Group ID:");
+                String memberId = JOptionPane.showInputDialog("Enter Member ID:");
+                itsFeature.leaveGroup(groupId, memberId);
+            }
+        });
+        gui.addButton(new AbstractAction("Send Message") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String groupId = JOptionPane.showInputDialog("Enter Group ID:");
+                String senderId = JOptionPane.showInputDialog("Enter Sender ID:");
+                String message = JOptionPane.showInputDialog("Enter Message:");
+                itsFeature.sendMessageToGroup(groupId, senderId, message);
+            }
+        });
+        gui.addButton(new AbstractAction("Stop") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                stop();
+            }
+        });
+        gui.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                terminate();
+            }
+        });
+        gui.showCentered();
+    }
+
+    private void start() {
+        itsFeature.start();
+    }
+
+    private void stop() {
+        itsFeature.stop();
+    }
+
+    private void terminate() {
+        System.exit(0);
     }
 }
