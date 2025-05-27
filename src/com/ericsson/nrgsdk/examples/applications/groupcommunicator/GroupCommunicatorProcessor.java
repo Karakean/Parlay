@@ -1,12 +1,21 @@
 package com.ericsson.nrgsdk.examples.applications.groupcommunicator;
 
-import com.ericsson.hosasdk.api.*;
+import com.ericsson.hosasdk.api.TpAddress;
+import com.ericsson.hosasdk.api.TpHosaDeliveryTime;
+import com.ericsson.hosasdk.api.TpHosaTerminatingAddressList;
+import com.ericsson.hosasdk.api.TpHosaUIMessageDeliveryType;
 import com.ericsson.hosasdk.api.hui.IpAppHosaUIManagerAdapter;
 import com.ericsson.hosasdk.api.hui.IpHosaUIManager;
 import com.ericsson.hosasdk.api.ui.P_UI_RESPONSE_REQUIRED;
+import com.ericsson.hosasdk.api.TpHosaMessage;
 import com.ericsson.nrgsdk.examples.tools.SDKToolkit;
-
-import java.util.*;
+import com.ericsson.hosasdk.api.TpHosaSendMessageError;
+import com.ericsson.hosasdk.api.TpHosaSendMessageReport;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Iterator;
 
 public class GroupCommunicatorProcessor extends IpAppHosaUIManagerAdapter {
 

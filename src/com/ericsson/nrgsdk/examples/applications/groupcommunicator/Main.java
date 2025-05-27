@@ -1,6 +1,8 @@
 package com.ericsson.nrgsdk.examples.applications.groupcommunicator;
 
-import javax.swing.*;
+
+import javax.swing.AbstractAction;
+import javax.swing.JOptionPane;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
